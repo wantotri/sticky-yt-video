@@ -1,0 +1,38 @@
+{
+  "name": "Sticky Youtube Video",
+  "version": "0.0.1",
+  "description": "Make youtube video player sticky",
+  "manifest_version": 2,
+  "author": "Kurnia Wanto",
+  "browser_action": {
+    "default_title": "Sticky Youtube Video",
+    "default_icon": {
+      "16": "/icons/yt16.png",
+      "32": "/icons/yt32.png",
+      "48": "/icons/yt48.png",
+      "128": "/icons/yt128.png"
+      }
+  },
+  "permissions": [
+    "tabs",
+    "activeTab",
+    "storage",
+    "https://www.youtube.com/watch*"
+  ],
+  "background": {
+    "scripts": ["background.js"],
+    "persistent": false
+  },
+  "content_scripts": [
+    {
+      "matches": ["https://www.youtube.com/watch*"],
+      "js": ["content_script.js"],
+      "run_at": "document_idle"
+    }
+  ],
+  "browser_specific_settings": {
+    "gecko": {
+      "id": "wanto47@gmail.com"
+    }
+  }
+}
