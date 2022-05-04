@@ -15,33 +15,34 @@ function waitElm(selector) {
 
 // wait for player-container-inner then create new MutationObserver
 async function playerInnerObserver() {
-  const playerInner = await waitElm('#player-container-inner')
-  const playerInnerObserver = new MutationObserver((mutationList) => {
+  const ctr = await waitElm('#player-container-inner')
+  const config = { childList: true, subtree: false }
+  const observer = new MutationObserver((mutationList) => {
     mutationList.forEach(mutation => {
       if (mutation.type === 'childList' && mutation.addedNodes.length > 0) {
         browser.storage.local.set({ "switchState": false })
       }
     })
   })
-  playerInnerObserver.observe(playerInner, { childList: true, subtree: false })
+  observer.observe(ctr, config)
 }
 
 // function to make the player-theater-container "sticky"
 async function stickPlayer(result) {
-  const playerTheaterCtr = await waitElm('#player-theater-container')
-  const columns = await waitElm('#columns')
-  const theaterBtn = await waitElm('[aria-label="Theater mode (t)"]')
+  const ctr = await waitElm('#player-theater-container')
+  const col = await waitElm('#columns')
+  const btn = await waitElm('[aria-label="Theater mode (t)"]')
 
   if (result.switchState) {
-    playerTheaterCtr.style.position = 'fixed'
-    playerTheaterCtr.style.zIndex = 1000
-    columns.style.marginTop = '56.25vw'
+    ctr.style.position = 'fixed'
+    ctr.style.zIndex = 1000
+    col.style.marginTop = '56.25vw'
     // force video player in theater mode
-    !playerTheaterCtr.hasChildNodes() && theaterBtn.click()
+    !ctr.hasChildNodes() && btn.click()
   } else {
-    playerTheaterCtr.style.position = 'relative'
-    playerTheaterCtr.style.zIndex = 1
-    columns.style.marginTop = ''
+    ctr.style.position = 'relative'
+    ctr.style.zIndex = 1
+    col.style.marginTop = ''
   }
 }
 
@@ -54,7 +55,7 @@ browser.storage.local.get(["switchState"])
   })
 
 browser.storage.onChanged.addListener(async (changes, namespace) => {
-  for (let [key, { oldValue, newValue }] of Object.entries(changes)) {
+  for (const [key, { oldValue, newValue }] of Object.entries(changes)) {
     if (oldValue !== newValue) {
       console.log(
         `Storage key "${key}" in namespace "${namespace}" changed.`,

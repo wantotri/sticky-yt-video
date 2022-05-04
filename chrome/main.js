@@ -1,5 +1,4 @@
 let stickySwitch = document.getElementById('stickySwitch')
-let playerInnerCtr = document.getElementById('player-container-inner')
 
 chrome.storage.local.get(["switchState"], (result) => {
   stickySwitch.checked = result.switchState

@@ -3,33 +3,34 @@ chrome.runtime.onInstalled.addListener(() => {
 })
 
 function observePlayerInner() {
-  const playerInnerObserver = new MutationObserver((mutationList, observer)  => {
+  const ctr = document.getElementById('player-container-inner')
+  const config = { childList: true, subtree: false }
+  const observer = new MutationObserver(mutationList => {
     mutationList.forEach(mutation => {
       if (mutation.type === 'childList' && mutation.addedNodes.length > 0) {
         chrome.storage.local.set({ "switchState": false })
       }
     })
   })
-  let playerInnerCtr = document.getElementById('player-container-inner')
-  playerInnerObserver.observe(playerInnerCtr, { childList: true })
+  observer.observe(ctr, config)
 }
 
 function setYtdPlayerSticky() {
-  let playerTheaterCtr = document.getElementById('player-theater-container')
-  let columns = document.getElementById('columns')
-  let theaterBtn = document.querySelector('[aria-label="Theater mode (t)"]')
+  const ctr = document.getElementById('player-theater-container')
+  const col = document.getElementById('columns')
+  const btn = document.querySelector('[aria-label="Theater mode (t)"]')
 
   chrome.storage.local.get(["switchState"], (result) => {
     if (result.switchState) {
-      playerTheaterCtr.style.position = 'fixed'
-      playerTheaterCtr.style.zIndex = 1000
-      columns.style.marginTop = '56.25vw'
+      ctr.style.position = 'fixed'
+      ctr.style.zIndex = 1000
+      col.style.marginTop = '56.25vw'
       // force video player in theater mode
-      !playerTheaterCtr.hasChildNodes() && theaterBtn.click()
+      !ctr.hasChildNodes() && btn.click()
     } else {
-      playerTheaterCtr.style.position = 'relative'
-      playerTheaterCtr.style.zIndex = 1
-      columns.style.marginTop = ''
+      ctr.style.position = 'relative'
+      ctr.style.zIndex = 1
+      col.style.marginTop = ''
     }
   })
 }
@@ -59,18 +60,20 @@ chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
 })
 
 chrome.storage.onChanged.addListener(async (changes, namespace) => {
-  for (let [key, { oldValue, newValue }] of Object.entries(changes)) {
-    console.log(
-      `Storage key "${key}" in namespace "${namespace}" changed.`,
-      `Old value was "${oldValue}", new value is "${newValue}".`
-    );
-    let [tab] = await chrome.tabs.query({
-      active: true,
-      currentWindow: true
-    });
-    chrome.scripting.executeScript({
-      target: { tabId: tab.id },
-      function: setYtdPlayerSticky
-    });
+  for (const [key, { oldValue, newValue }] of Object.entries(changes)) {
+    if (newValue !== oldValue) {
+      console.log(
+        `Storage key "${key}" in namespace "${namespace}" changed.`,
+        `Old value was "${oldValue}", new value is "${newValue}".`
+      );
+      const [tab] = await chrome.tabs.query({
+        active: true,
+        currentWindow: true
+      });
+      chrome.scripting.executeScript({
+        target: { tabId: tab.id },
+        function: setYtdPlayerSticky
+      });
+    }
   }
 });
